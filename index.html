@@ -20,6 +20,7 @@
     --oxblood:#8E2B33;
     --moss:#3F6C51;
     --drop:#A6ABB4;
+    --red:#C72A2A;
 
     /* the page itself: A4 minus 10mm margins */
     --page-w:190mm;
@@ -102,16 +103,16 @@
   .notes li .txt{flex:1}
 
   .rows{margin:0;padding:0;list-style:none}
-  .row{display:grid;grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31%;
+  .row{display:grid;grid-template-columns:calc(var(--fs) * 7.8pt) 1fr 31%;
     align-items:baseline;column-gap:8pt;padding:1.2pt 0 1.2pt 4pt;
     border-bottom:.5pt dotted var(--rule)}
-  .review .row{grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31% calc(var(--fs) * 3.6pt)}
-  .time{font-family:"IBM Plex Mono",monospace;white-space:nowrap;color:var(--ink-soft);
-    font-size:calc(var(--fs) * 0.84pt)}
+  .review .row{grid-template-columns:calc(var(--fs) * 7.8pt) 1fr 31% calc(var(--fs) * 3.6pt)}
+  .time{white-space:nowrap;color:var(--ink);font-size:calc(var(--fs) * 1pt);
+    line-height:1.24;font-variant-numeric:tabular-nums}
   .what{font-size:calc(var(--fs) * 1pt);line-height:1.24}
   .where{font-family:Newsreader,Georgia,serif;font-style:italic;color:var(--ink-soft);
     font-size:calc(var(--fs) * 0.88pt);line-height:1.24}
-  .cancelled .what{text-decoration:line-through;color:var(--drop)}
+  .cx{color:var(--red);font-weight:600}
   .off{opacity:.4}
   .off .what,.off .txt{text-decoration:line-through}
   .tag{display:inline-block;font-family:"IBM Plex Mono",monospace;letter-spacing:.05em;
@@ -133,7 +134,7 @@
     #stage{display:block !important;height:auto !important;overflow:visible !important}
     #page{width:auto;min-height:0;transform:none;box-shadow:none}
     .off,.toggle{display:none !important}
-    .review .row{grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31%}
+    .review .row{grid-template-columns:calc(var(--fs) * 7.8pt) 1fr 31%}
   }
 </style>
 </head>
@@ -327,6 +328,8 @@ function isCancelled(text) { return /\(cancelled\)/i.test(text); }
 const $ = id => document.getElementById(id);
 const selected = c => [...document.querySelectorAll("#" + c + " input:checked")].map(i => i.value);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+/* the school prints "(Cancelled)" in red — so do we */
+const tint = s => esc(s).replace(/\((?:Cancelled|Canceled)\)/gi, m => `<span class="cx">${m}</span>`);
 
 function buildChips() {
   $("gradeChips").innerHTML = GRADES.map(g => `
@@ -388,7 +391,7 @@ function render() {
     if (sr.length) html += `<ul class="rows">` + sr.map(r => `
       <li class="row ${r.keep ? "" : "off"} ${isCancelled(r.what) ? "cancelled" : ""}">
         <div class="time">${esc(r.time)}</div>
-        <div class="what">${esc(r.what)}${r.general ? '<span class="tag">all</span>' : ""}</div>
+        <div class="what">${tint(r.what)}${r.general ? '<span class="tag">all</span>' : ""}</div>
         <div class="where">${esc(r.where)}</div>
         ${toggle(r, review)}
       </li>`).join("") + `</ul>`;
@@ -504,17 +507,42 @@ const A4 = { w: 595.28, h: 841.89 };
 const M = 28;                                    /* 10mm margins */
 const CONTENT_W = A4.w - M * 2;
 const CONTENT_H = A4.h - M * 2 - 6;   /* 6pt of breathing room */
-const COL_TIME = 62, GAP = 8, COL_VENUE = 150;
+const GAP = 8, COL_VENUE = 150;
 
 const INK = [20, 33, 58], SOFT = [90, 100, 120],
       OX  = [142, 43, 51], BAND = [228, 231, 225],
-      RULE = [190, 195, 190], GREY = [150, 155, 165];
+      RULE = [190, 195, 190], RED = [199, 42, 42];
+
+const CANC_RE = /\((?:cancelled|canceled)\)/i;
 
 /* One routine measures and draws, so what we measure is what we get.
    Pass pdf = null to measure only. Returns the height used.        */
 function layout(pdf, fs, sheet) {
   const lead = fs * 1.22;
+  const COL_TIME = fs * 7.4;          /* wide enough for "07:00 - 07:35" at any size */
   let y = M;
+
+  /* draw a line of description, tinting "(Cancelled)" red like the school does */
+  const drawWhat = (line, x, yy) => {
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(fs);
+    const m = line.match(CANC_RE);
+    if (!m) {
+      pdf.setTextColor(...INK);
+      pdf.text(line, x, yy);
+      return;
+    }
+    const pre = line.slice(0, m.index);
+    const post = line.slice(m.index + m[0].length);
+    pdf.setTextColor(...INK);
+    pdf.text(pre, x, yy);
+    let cx = x + pdf.getTextWidth(pre);
+    pdf.setTextColor(...RED);
+    pdf.text(m[0], cx, yy);
+    cx += pdf.getTextWidth(m[0]);
+    pdf.setTextColor(...INK);
+    if (post) pdf.text(post, cx, yy);
+  };
 
   const text = (s, x, yy, size, style, color) => {
     if (!pdf) return;
@@ -561,7 +589,6 @@ function layout(pdf, fs, sheet) {
 
     const wWidth = CONTENT_W - COL_TIME - COL_VENUE - GAP * 2;
     day.rows.forEach(r => {
-      const cancelled = isCancelled(r.what);
       let whatLines = [r.what], whereLines = r.where ? [r.where] : [""];
       if (pdf) {
         pdf.setFont("helvetica", "normal"); pdf.setFontSize(fs);
@@ -578,13 +605,12 @@ function layout(pdf, fs, sheet) {
 
       if (pdf) {
         const base = y + lead * 0.78;
-        pdf.setFont("helvetica", "normal"); pdf.setFontSize(fs * 0.86);
-        pdf.setTextColor(...SOFT);
+        /* the time reads as plainly as the activity: same face, size and weight */
+        pdf.setFont("helvetica", "normal"); pdf.setFontSize(fs);
+        pdf.setTextColor(...INK);
         pdf.text(r.time, M + 4, base);
 
-        pdf.setFontSize(fs);
-        pdf.setTextColor(...(cancelled ? GREY : INK));
-        pdf.text(whatLines, M + COL_TIME + GAP, base);
+        whatLines.forEach((ln, i) => drawWhat(ln, M + COL_TIME + GAP, base + i * lead));
 
         pdf.setFont("helvetica", "italic"); pdf.setFontSize(fs * 0.88);
         pdf.setTextColor(...SOFT);
