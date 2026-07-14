@@ -15,154 +15,124 @@
     --chalk:#ECEEE9;
     --card:#FBFBF9;
     --rule:#CDD2CC;
+    --band:#E4E7E1;
     --oxblood:#8E2B33;
     --moss:#3F6C51;
     --drop:#A6ABB4;
+
+    /* the page itself: A4 minus 10mm margins */
+    --page-w:190mm;
+    --page-h:277mm;
+    --fs:9;          /* base type size in points — auto-fit tunes this */
+    --zoom:1;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
-    background:var(--chalk);
-    color:var(--ink);
-    font-family:"IBM Plex Sans",system-ui,sans-serif;
-    font-size:16px;
-    line-height:1.45;
+    background:var(--chalk);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.45;
     -webkit-text-size-adjust:100%;
   }
-  .wrap{max-width:820px;margin:0 auto;padding:20px 16px 64px}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 64px}
 
-  /* ---------- masthead ---------- */
   header.masthead{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
-  .eyebrow{
-    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--oxblood);margin:0 0 6px
-  }
-  h1{
-    font-family:Newsreader,Georgia,serif;font-weight:600;font-size:34px;
-    line-height:1.05;margin:0 0 6px;letter-spacing:-.01em
-  }
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--oxblood);margin:0 0 6px}
+  h1{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:34px;line-height:1.05;
+    margin:0 0 6px;letter-spacing:-.01em}
   .lede{margin:0;color:var(--ink-soft);font-size:15px;max-width:56ch}
 
-  /* ---------- panels ---------- */
-  .panel{
-    background:var(--card);border:1px solid var(--rule);border-radius:2px;
-    padding:16px;margin-bottom:16px
-  }
-  .panel h2{
-    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;font-weight:500
-  }
-  .file-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  input[type=file]{
-    font:inherit;font-size:14px;flex:1 1 220px;min-width:0;
-    padding:10px;background:#fff;border:1px dashed var(--rule);border-radius:2px
-  }
+  .panel{background:var(--card);border:1px solid var(--rule);border-radius:2px;
+    padding:16px;margin-bottom:16px}
+  .panel h2{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;font-weight:500}
+  input[type=file]{font:inherit;font-size:14px;width:100%;padding:10px;background:#fff;
+    border:1px dashed var(--rule);border-radius:2px}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .chip{position:relative}
   .chip input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
-  .chip span{
-    display:block;padding:8px 14px;border:1px solid var(--rule);border-radius:999px;
-    background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.12s
-  }
+  .chip span{display:block;padding:8px 14px;border:1px solid var(--rule);border-radius:999px;
+    background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.12s}
   .chip input:checked + span{background:var(--ink);color:#fff;border-color:var(--ink)}
   .chip input:focus-visible + span{outline:2px solid var(--oxblood);outline-offset:2px}
   .group + .group{margin-top:16px}
-  .group > .label{
-    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
-    text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px
-  }
-  .switch{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-soft);margin-top:16px}
-  .switch input{width:18px;height:18px;accent-color:var(--ink)}
+  .group > .label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+  .switch{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-soft);margin-top:14px}
+  .switch input{width:18px;height:18px;accent-color:var(--ink);flex:none}
 
-  button{
-    font:inherit;font-weight:600;font-size:15px;padding:12px 22px;border-radius:2px;
-    border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer
-  }
+  button{font:inherit;font-weight:600;font-size:15px;padding:12px 22px;border-radius:2px;
+    border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
   button.ghost{background:transparent;color:var(--ink)}
-  button:disabled{opacity:.4;cursor:not-allowed}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
   .status{font-size:14px;color:var(--ink-soft);margin-top:10px;min-height:1.2em}
   .status.error{color:var(--oxblood)}
+  .fit{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--moss)}
+  .fit.over{color:var(--oxblood)}
+  .review-note{font-size:13px;color:var(--ink-soft);background:var(--card);border:1px solid var(--rule);
+    border-left:3px solid var(--moss);padding:10px 12px;margin-bottom:16px}
 
-  /* ---------- schedule ---------- */
-  #sheet{display:none}
-  #sheet.ready{display:block}
-  .sheet-head{border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px}
-  .sheet-title{font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:600;margin:0}
-  .sheet-sub{
-    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--oxblood);margin:4px 0 0
+  /* ============ THE PAGE ============
+     Rendered at true A4 size, in points, using the same rules that
+     print — so what you see on screen is the sheet that comes out. */
+  #stage{display:none}
+  #stage.ready{display:block}
+  #page{
+    width:var(--page-w);min-height:var(--page-h);
+    transform:scale(var(--zoom));transform-origin:top left;
+    background:#fff;box-shadow:0 1px 0 var(--rule),0 12px 30px rgba(20,33,58,.10);
   }
-  .day{margin-bottom:24px;break-inside:avoid}
-  .day-name{
-    font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:13px;letter-spacing:.16em;
-    text-transform:uppercase;margin:0 0 2px;padding-bottom:6px;border-bottom:1px solid var(--ink)
-  }
-  .notes{margin:8px 0 10px;padding:0;list-style:none}
-  .notes li{
-    font-size:13px;font-weight:600;color:var(--oxblood);
-    padding:3px 0 3px 14px;border-left:3px solid var(--oxblood);margin-bottom:4px
-  }
-  /* the spine: a ruled register down the day */
-  .rows{border-left:1px solid var(--rule);padding-left:0;margin:0;list-style:none}
-  .row{
-    display:grid;grid-template-columns:108px 1fr;gap:4px 14px;
-    padding:7px 0 7px 14px;border-bottom:1px dotted var(--rule);position:relative
-  }
-  .row::before{
-    content:"";position:absolute;left:-4px;top:15px;width:7px;height:1px;background:var(--rule)
-  }
-  .time{
-    font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);
-    padding-top:2px;white-space:nowrap
-  }
-  .what{font-size:15px}
-  .where{
-    grid-column:2;font-size:13px;color:var(--ink-soft);font-style:italic;
-    font-family:Newsreader,Georgia,serif
-  }
+
+  .sheet-head{border-bottom:2px solid var(--ink);padding:0 0 4pt;margin-bottom:6pt}
+  .sheet-title{font-family:Newsreader,Georgia,serif;font-weight:600;margin:0;
+    font-size:calc(var(--fs) * 1.9pt);line-height:1.1}
+  .sheet-sub{font-family:"IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--oxblood);margin:2pt 0 0;font-size:calc(var(--fs) * 0.82pt)}
+
+  .day{margin-bottom:5pt;break-inside:avoid;page-break-inside:avoid}
+  .day-name{font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0;
+    font-size:calc(var(--fs) * 0.92pt);padding:2pt 0 2pt 4pt;
+    border-top:1.2pt solid var(--ink);border-bottom:.6pt solid var(--ink);
+    background:var(--band);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .notes{margin:0;padding:0;list-style:none}
+  .notes li{font-weight:600;color:var(--oxblood);text-transform:uppercase;letter-spacing:.03em;
+    font-size:calc(var(--fs) * 0.8pt);padding:1.5pt 0 1.5pt 4pt;
+    border-bottom:.5pt dotted var(--rule);display:flex;gap:6pt}
+  .notes li .txt{flex:1}
+
+  .rows{margin:0;padding:0;list-style:none}
+  .row{display:grid;grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31%;
+    align-items:baseline;column-gap:8pt;padding:1.2pt 0 1.2pt 4pt;
+    border-bottom:.5pt dotted var(--rule)}
+  .review .row{grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31% calc(var(--fs) * 3.6pt)}
+  .time{font-family:"IBM Plex Mono",monospace;white-space:nowrap;color:var(--ink-soft);
+    font-size:calc(var(--fs) * 0.84pt)}
+  .what{font-size:calc(var(--fs) * 1pt);line-height:1.24}
+  .where{font-family:Newsreader,Georgia,serif;font-style:italic;color:var(--ink-soft);
+    font-size:calc(var(--fs) * 0.88pt);line-height:1.24}
   .cancelled .what{text-decoration:line-through;color:var(--drop)}
-  .row.off{opacity:.42}
-  .row.off .what{text-decoration:line-through}
-  .tag{
-    display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;
-    letter-spacing:.08em;color:var(--moss);border:1px solid var(--moss);
-    border-radius:2px;padding:0 4px;margin-left:6px;vertical-align:1px
-  }
-  .toggle{
-    grid-column:3;background:none;border:0;color:var(--ink-soft);font-size:11px;
-    font-family:"IBM Plex Mono",monospace;padding:0 0 0 10px;cursor:pointer;text-decoration:underline
-  }
-  .review .rows{grid-template-columns:108px 1fr auto}
-  .review .row{grid-template-columns:108px 1fr auto}
-  .day.empty-day{display:none}
+  .off{opacity:.4}
+  .off .what,.off .txt{text-decoration:line-through}
+  .tag{display:inline-block;font-family:"IBM Plex Mono",monospace;letter-spacing:.05em;
+    color:var(--moss);border:.5pt solid var(--moss);border-radius:2px;padding:0 2pt;
+    margin-left:4pt;font-size:calc(var(--fs) * 0.62pt);vertical-align:.5pt}
+  .toggle{background:none;border:0;color:var(--ink-soft);cursor:pointer;text-decoration:underline;
+    font-family:"IBM Plex Mono",monospace;font-size:calc(var(--fs) * 0.72pt);padding:0;text-align:right}
 
-  .review-note{
-    font-size:13px;color:var(--ink-soft);background:#fff;border:1px solid var(--rule);
-    border-left:3px solid var(--moss);padding:10px 12px;margin-bottom:18px
-  }
+  /* while measuring — and when printing — dropped lines are simply gone */
+  .measuring .off,.measuring .toggle{display:none !important}
 
-  @media (max-width:480px){
-    h1{font-size:27px}
-    .row{grid-template-columns:92px 1fr}
-    .review .row{grid-template-columns:92px 1fr auto}
-  }
+  @media (max-width:520px){ h1{font-size:27px} }
 
-  /* ---------- print ---------- */
   @media print{
-    @page{size:A4 portrait;margin:12mm}
-    body{background:#fff;font-size:11pt}
+    @page{size:A4 portrait;margin:10mm}
+    body{background:#fff}
     .wrap{max-width:none;padding:0}
     .noprint{display:none !important}
-    .row.off{display:none}
-    .toggle{display:none}
-    .review .row{grid-template-columns:96px 1fr}
-    .day{break-inside:avoid;page-break-inside:avoid;margin-bottom:16px}
-    .row{padding:4px 0 4px 12px}
-    .what{font-size:11pt}
-    .where,.time{font-size:9pt}
-    .notes li{font-size:9.5pt}
+    #stage{display:block !important;height:auto;overflow:visible}
+    #page{width:auto;min-height:0;transform:none;box-shadow:none}
+    .off,.toggle{display:none !important}
+    .review .row{grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31%}
   }
 </style>
 </head>
@@ -172,14 +142,12 @@
   <header class="masthead noprint">
     <p class="eyebrow">Prep school weekly schedule</p>
     <h1>Filter the WhatzUp</h1>
-    <p class="lede">Load the weekly PDF, tick the grades and age groups you care about, and print a fridge-sized version. The file never leaves your phone — everything runs in this page.</p>
+    <p class="lede">Load the weekly PDF, tick the grades and age groups you care about, and print one A4 page for the fridge. The file never leaves your phone — everything runs in this page.</p>
   </header>
 
   <section class="panel noprint">
     <h2>1 — The PDF</h2>
-    <div class="file-row">
-      <input type="file" id="file" accept="application/pdf,.pdf">
-    </div>
+    <input type="file" id="file" accept="application/pdf,.pdf">
     <p class="status" id="status">Choose the weekly PDF to begin.</p>
   </section>
 
@@ -194,34 +162,37 @@
       <div class="chips" id="ageChips"></div>
     </div>
     <label class="switch"><input type="checkbox" id="showCancelled" checked> Keep cancelled activities (struck through)</label>
-    <label class="switch"><input type="checkbox" id="reviewMode" checked> Show what was removed, so I can put things back</label>
+    <label class="switch"><input type="checkbox" id="reviewMode" checked> Show what was removed, so I can put it back</label>
+    <label class="switch"><input type="checkbox" id="autoFit" checked> Shrink the type to fit one page</label>
   </section>
 
   <div class="actions noprint" id="actions" hidden>
     <button id="print">Print / Save as PDF</button>
     <button id="reset" class="ghost">Start over</button>
+    <span class="fit" id="fit"></span>
   </div>
 
   <div class="review-note noprint" id="reviewNote" hidden>
-    Faded, struck-through lines will not print. Tap <em>keep</em> or <em>drop</em> on any line to overrule the filter.
+    Faded, struck-through lines will not print. Tap <em>drop</em> or <em>keep</em> on any line to overrule the filter.
   </div>
 
-  <main id="sheet"></main>
+  <div id="stage">
+    <div id="page"><div id="inner"></div></div>
+  </div>
 </div>
 
 <script>
 /* ============================================================
    Schedule Filter — everything runs in the browser.
-   Three parts: PARSE (read the PDF), FILTER (decide what's
-   relevant), RENDER (draw it, print it).
+   PARSE the PDF, FILTER what's relevant, RENDER it onto a page
+   that is literally A4-sized, so the preview is the printout.
    ============================================================ */
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 /* ---------- the school's grade vocabulary ----------
-   The activity rows use the short codes; the day banners spell
-   them out in full. Both have to be recognised.               */
+   Activity rows use the short codes; the day banners spell them out. */
 const GRADES = [
   { code: "UI",   long: "UPPER I",   label: "Upper I"   },
   { code: "LII",  long: "LOWER II",  label: "Lower II"  },
@@ -232,23 +203,25 @@ const GRADES = [
 const DEFAULT_GRADES = ["LIII"];
 const DEFAULT_AGES   = ["u12"];
 
-/* Longest alternatives first, and \b on both ends, so that UI
-   never matches inside UII or UIII (and LII never inside LIII). */
+/* Longest alternatives first, \b at both ends, so UI never matches
+   inside UII or UIII (nor LII inside LIII). */
 const SHORT_RE = /\b(UIII|UII|UI|LIII|LII)\b/g;
 const LONG_RE  = /\b(UPPER III|UPPER II|UPPER I|LOWER III|LOWER II)\b/g;
 const AGE_RE   = /\bu(\d{1,2})\b/gi;
 const DAY_RE   = /^(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)\b\s*(\d{1,2}\s+[A-Z]+)?\s*(.*)$/i;
 const TIME_RE  = /^\d{1,2}:\d{2}/;
 
-/* Column boundaries, in PDF points, measured from the real file.
-   Times start at x=59, descriptions at x=157, venues at x=547. */
+/* Column boundaries in PDF points, measured off the real schedule:
+   times start at x=59, descriptions at x=157, venues at x=547. */
 const X_DESC  = 145;
 const X_VENUE = 530;
-const X_DAY   = 45;   /* day headers hug the left margin */
-const Y_TOL   = 4;    /* two words on the same visual row can differ by a point or two */
+const X_DAY   = 45;
+const Y_TOL   = 4;
 
-let doc = null;       /* the parsed document */
-let overrides = {};   /* rowId -> true (force keep) / false (force drop) */
+const FS_MIN = 5.2, FS_MAX = 11, FS_DEFAULT = 9;
+
+let doc = null;
+let overrides = {};
 
 /* ============================================================
    PARSE
@@ -264,7 +237,6 @@ async function parsePdf(arrayBuffer) {
       .filter(i => i.str.trim() !== "")
       .map(i => ({ text: i.str, x: i.transform[4], y: i.transform[5] }));
 
-    /* group words into visual lines by their y position */
     const buckets = [];
     items.forEach(it => {
       const b = buckets.find(b => Math.abs(b.y - it.y) <= Y_TOL);
@@ -272,18 +244,16 @@ async function parsePdf(arrayBuffer) {
       else buckets.push({ y: it.y, items: [it] });
     });
 
-    buckets.sort((a, b) => b.y - a.y);            /* PDF y grows upwards */
+    buckets.sort((a, b) => b.y - a.y);          /* PDF y grows upwards */
     buckets.forEach(b => {
       b.items.sort((a, c) => a.x - c.x);
-      lines.push({ page: p, items: b.items });
+      lines.push({ items: b.items });
     });
   }
 
-  /* classify each line */
   const header = [];
   const days = [];
-  let current = null;
-  let rowId = 0;
+  let current = null, id = 0;
 
   lines.forEach(line => {
     const minX = Math.min(...line.items.map(i => i.x));
@@ -291,33 +261,30 @@ async function parsePdf(arrayBuffer) {
     const dayMatch = minX < X_DAY ? joined.match(DAY_RE) : null;
 
     if (dayMatch) {
-      /* e.g. "MONDAY 13 JULY LOWER III FAL TEST" -> day + one banner note */
       current = {
         name: [dayMatch[1], dayMatch[2]].filter(Boolean).join(" ").toUpperCase(),
-        notes: [],
-        rows: [],
+        notes: [], rows: [],
       };
       days.push(current);
       const trailing = (dayMatch[3] || "").trim();
-      if (trailing) current.notes.push({ id: "n" + rowId++, text: trailing });
+      if (trailing) current.notes.push({ id: "n" + id++, text: trailing });
       return;
     }
 
-    const timeCell = line.items.filter(i => i.x < X_DESC).map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
+    const time = line.items.filter(i => i.x < X_DESC)
+      .map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
 
-    if (current && TIME_RE.test(timeCell)) {
-      const what  = line.items.filter(i => i.x >= X_DESC && i.x < X_VENUE).map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
-      const where = line.items.filter(i => i.x >= X_VENUE).map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
-      current.rows.push({ id: "r" + rowId++, time: timeCell, what, where });
+    if (current && TIME_RE.test(time)) {
+      const what = line.items.filter(i => i.x >= X_DESC && i.x < X_VENUE)
+        .map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
+      const where = line.items.filter(i => i.x >= X_VENUE)
+        .map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
+      current.rows.push({ id: "r" + id++, time, what, where });
       return;
     }
 
-    /* bold text floating under a day header, with no time: a banner note */
-    if (current) {
-      current.notes.push({ id: "n" + rowId++, text: joined });
-    } else {
-      header.push(joined);           /* masthead / date range, above the first day */
-    }
+    if (current) current.notes.push({ id: "n" + id++, text: joined });
+    else header.push(joined);       /* masthead and date range */
   });
 
   return { header, days };
@@ -327,9 +294,7 @@ async function parsePdf(arrayBuffer) {
    FILTER
    ============================================================ */
 function gradesIn(text) {
-  const found = new Set();
-  const t = text.toUpperCase();
-  let m;
+  const found = new Set(); const t = text.toUpperCase(); let m;
   SHORT_RE.lastIndex = 0;
   while ((m = SHORT_RE.exec(t))) found.add(m[1]);
   LONG_RE.lastIndex = 0;
@@ -339,126 +304,46 @@ function gradesIn(text) {
   }
   return [...found];
 }
-
 function agesIn(text) {
-  const found = new Set();
-  let m;
+  const found = new Set(); let m;
   AGE_RE.lastIndex = 0;
   while ((m = AGE_RE.exec(text))) found.add("u" + m[1]);
   return [...found];
 }
-
-/* An entry is relevant if it names one of your grades or one of
-   your age groups. An entry that names NO grade and NO age group
-   is a general school activity, and is always kept.            */
+/* Names one of your grades or age groups → keep. Names none at all
+   → a general school activity, always kept. */
 function isRelevant(text, grades, ages) {
-  const g = gradesIn(text);
-  const a = agesIn(text);
-  if (g.length === 0 && a.length === 0) return { keep: true, general: true };
-  const hit = g.some(x => grades.includes(x)) || a.some(x => ages.includes(x));
-  return { keep: hit, general: false };
+  const g = gradesIn(text), a = agesIn(text);
+  if (!g.length && !a.length) return { keep: true, general: true };
+  return { keep: g.some(x => grades.includes(x)) || a.some(x => ages.includes(x)), general: false };
 }
-
-function isCancelled(text) {
-  return /\(cancelled\)/i.test(text);
-}
+function isCancelled(text) { return /\(cancelled\)/i.test(text); }
 
 /* ============================================================
    RENDER
    ============================================================ */
 const $ = id => document.getElementById(id);
-
-function selected(containerId) {
-  return [...document.querySelectorAll("#" + containerId + " input:checked")].map(i => i.value);
-}
+const selected = c => [...document.querySelectorAll("#" + c + " input:checked")].map(i => i.value);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
 function buildChips() {
   $("gradeChips").innerHTML = GRADES.map(g => `
-    <label class="chip">
-      <input type="checkbox" value="${g.code}" ${DEFAULT_GRADES.includes(g.code) ? "checked" : ""}>
-      <span>${g.label}</span>
-    </label>`).join("");
+    <label class="chip"><input type="checkbox" value="${g.code}"
+      ${DEFAULT_GRADES.includes(g.code) ? "checked" : ""}><span>${g.label}</span></label>`).join("");
 
-  /* offer exactly the age groups this week's PDF actually mentions */
-  const found = new Set();
+  const found = new Set(DEFAULT_AGES);
   doc.days.forEach(d => {
     d.rows.forEach(r => agesIn(r.what).forEach(a => found.add(a)));
     d.notes.forEach(n => agesIn(n.text).forEach(a => found.add(a)));
   });
-  DEFAULT_AGES.forEach(a => found.add(a));
   const ages = [...found].sort((a, b) => +a.slice(1) - +b.slice(1));
-
   $("ageChips").innerHTML = ages.map(a => `
-    <label class="chip">
-      <input type="checkbox" value="${a}" ${DEFAULT_AGES.includes(a) ? "checked" : ""}>
-      <span>${a}</span>
-    </label>`).join("");
+    <label class="chip"><input type="checkbox" value="${a}"
+      ${DEFAULT_AGES.includes(a) ? "checked" : ""}><span>${a}</span></label>`).join("");
 
   restorePicks();
   document.querySelectorAll(".chip input").forEach(i =>
     i.addEventListener("change", () => { savePicks(); render(); }));
-}
-
-function render() {
-  const grades = selected("gradeChips");
-  const ages   = selected("ageChips");
-  const keepCancelled = $("showCancelled").checked;
-  const review = $("reviewMode").checked;
-
-  const title = doc.header.find(h => /whatzup/i.test(h)) || "Weekly schedule";
-  const range = doc.header.find(h => /\d/.test(h) && h !== title) || "";
-  const who = [...grades, ...ages].join(" · ") || "nobody selected";
-
-  let html = `
-    <div class="sheet-head">
-      <h2 class="sheet-title">${esc(title)}</h2>
-      <p class="sheet-sub">${esc(range)}${range ? " — " : ""}${esc(who)}</p>
-    </div>`;
-
-  doc.days.forEach(day => {
-    const notes = day.notes.map(n => {
-      const v = verdict(n.id, n.text, grades, ages, keepCancelled);
-      return { ...n, ...v };
-    });
-    const rows = day.rows.map(r => {
-      const v = verdict(r.id, r.what + " " + r.where, grades, ages, keepCancelled);
-      return { ...r, ...v };
-    });
-
-    const anyKept = notes.some(n => n.keep) || rows.some(r => r.keep);
-    if (!anyKept && !review) return;
-
-    html += `<section class="day ${review ? "review" : ""}">
-      <h3 class="day-name">${esc(day.name)}</h3>`;
-
-    const shownNotes = notes.filter(n => n.keep || review);
-    if (shownNotes.length) {
-      html += `<ul class="notes">` + shownNotes.map(n =>
-        `<li class="${n.keep ? "" : "off"}">${esc(n.text)}${toggle(n, review)}</li>`).join("") + `</ul>`;
-    }
-
-    const shownRows = rows.filter(r => r.keep || review);
-    if (shownRows.length) {
-      html += `<ul class="rows">` + shownRows.map(r => `
-        <li class="row ${r.keep ? "" : "off"} ${isCancelled(r.what) ? "cancelled" : ""}">
-          <div class="time">${esc(r.time)}</div>
-          <div class="what">${esc(r.what)}${r.general ? '<span class="tag">all</span>' : ""}</div>
-          ${r.where ? `<div class="where">${esc(r.where)}</div>` : ""}
-          ${toggle(r, review)}
-        </li>`).join("") + `</ul>`;
-    }
-    html += `</section>`;
-  });
-
-  $("sheet").innerHTML = html;
-  $("sheet").classList.add("ready");
-  $("reviewNote").hidden = !review;
-
-  document.querySelectorAll(".toggle").forEach(btn =>
-    btn.addEventListener("click", () => {
-      overrides[btn.dataset.id] = btn.dataset.keep !== "true";
-      render();
-    }));
 }
 
 function verdict(id, text, grades, ages, keepCancelled) {
@@ -467,23 +352,136 @@ function verdict(id, text, grades, ages, keepCancelled) {
   if (id in overrides) keep = overrides[id];
   return { keep, general };
 }
+const toggle = (item, review) => review
+  ? `<button class="toggle noprint" data-id="${item.id}" data-keep="${item.keep}">${item.keep ? "drop" : "keep"}</button>`
+  : "";
 
-function toggle(item, review) {
-  if (!review) return "";
-  return `<button class="toggle noprint" data-id="${item.id}" data-keep="${item.keep}">${item.keep ? "drop" : "keep"}</button>`;
+function render() {
+  const grades = selected("gradeChips");
+  const ages = selected("ageChips");
+  const keepCancelled = $("showCancelled").checked;
+  const review = $("reviewMode").checked;
+
+  const title = doc.header.find(h => /whatzup/i.test(h)) || "Weekly schedule";
+  const range = doc.header.find(h => /\d/.test(h) && h !== title) || "";
+  const who = [...grades, ...ages].join(" · ") || "nothing selected";
+
+  let html = `<div class="sheet-head">
+      <h2 class="sheet-title">${esc(title)}</h2>
+      <p class="sheet-sub">${esc(range)}${range ? " — " : ""}${esc(who)}</p>
+    </div>`;
+
+  doc.days.forEach(day => {
+    const notes = day.notes.map(n => ({ ...n, ...verdict(n.id, n.text, grades, ages, keepCancelled) }));
+    const rows  = day.rows.map(r => ({ ...r, ...verdict(r.id, r.what + " " + r.where, grades, ages, keepCancelled) }));
+    if (!notes.some(n => n.keep) && !rows.some(r => r.keep) && !review) return;
+
+    html += `<section class="day"><h3 class="day-name">${esc(day.name)}</h3>`;
+
+    const sn = notes.filter(n => n.keep || review);
+    if (sn.length) html += `<ul class="notes">` + sn.map(n =>
+      `<li class="${n.keep ? "" : "off"}"><span class="txt">${esc(n.text)}</span>${toggle(n, review)}</li>`).join("") + `</ul>`;
+
+    const sr = rows.filter(r => r.keep || review);
+    if (sr.length) html += `<ul class="rows">` + sr.map(r => `
+      <li class="row ${r.keep ? "" : "off"} ${isCancelled(r.what) ? "cancelled" : ""}">
+        <div class="time">${esc(r.time)}</div>
+        <div class="what">${esc(r.what)}${r.general ? '<span class="tag">all</span>' : ""}</div>
+        <div class="where">${esc(r.where)}</div>
+        ${toggle(r, review)}
+      </li>`).join("") + `</ul>`;
+
+    html += `</section>`;
+  });
+
+  $("inner").innerHTML = html;
+  $("page").className = review ? "review" : "";
+  $("stage").classList.add("ready");
+  $("reviewNote").hidden = !review;
+
+  document.querySelectorAll(".toggle").forEach(b =>
+    b.addEventListener("click", () => {
+      overrides[b.dataset.id] = b.dataset.keep !== "true";
+      render();
+    }));
+
+  fitPage();
+  zoomToScreen();
 }
 
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+/* ---------- auto-fit ----------
+   #page is a real A4 content box, so its height in pixels is the
+   truth. Shrink the base type until the content clears one page.
+   Dropped lines are hidden while measuring — they don't print. */
+function pageLimitPx() {
+  const probe = document.createElement("div");
+  probe.style.cssText = "height:277mm;position:absolute;visibility:hidden;top:0;left:0";
+  document.body.appendChild(probe);
+  const h = probe.getBoundingClientRect().height;
+  probe.remove();
+  return h;
+}
+function setFs(v) { document.documentElement.style.setProperty("--fs", v); }
+
+function contentHeight() {
+  const page = $("page"), zoom = getZoom();
+  page.classList.add("measuring");
+  /* the page is scaled on screen; divide it back out to get true height */
+  const h = $("inner").getBoundingClientRect().height / zoom;
+  page.classList.remove("measuring");
+  return h;
+}
+function getZoom() {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--zoom")) || 1;
 }
 
-/* ---------- remember the family's picks between weeks ---------- */
+function fitPage() {
+  const limit = pageLimitPx();
+
+  if (!$("autoFit").checked) {
+    setFs(FS_DEFAULT);
+    return report(Math.ceil(contentHeight() / limit), FS_DEFAULT);
+  }
+
+  /* binary search the largest type size that still fits one page */
+  let lo = FS_MIN, hi = FS_MAX, best = null;
+  for (let i = 0; i < 14; i++) {
+    const mid = (lo + hi) / 2;
+    setFs(mid);
+    if (contentHeight() <= limit) { best = mid; lo = mid; } else { hi = mid; }
+  }
+  if (best === null) {                       /* even the smallest type overflows */
+    setFs(FS_MIN);
+    return report(Math.ceil(contentHeight() / limit), FS_MIN);
+  }
+  setFs(best);
+  report(1, best);
+}
+
+function report(pages, fs) {
+  const el = $("fit");
+  el.className = "fit" + (pages > 1 ? " over" : "");
+  el.textContent = pages > 1
+    ? `${pages} pages · ${fs.toFixed(1)}pt — untick a grade to fit`
+    : `1 page · ${fs.toFixed(1)}pt`;
+}
+
+/* an A4 page is wider than a phone: scale it to the screen */
+function zoomToScreen() {
+  const avail = $("stage").clientWidth;
+  const raw = $("page").offsetWidth;         /* unscaled layout width */
+  const zoom = Math.min(1, avail / raw);
+  document.documentElement.style.setProperty("--zoom", zoom);
+  $("stage").style.height = ($("page").offsetHeight * zoom + 20) + "px";
+}
+window.addEventListener("resize", () => { if (doc) { zoomToScreen(); } });
+
+/* ---------- remember the family's picks ---------- */
 function savePicks() {
   try {
-    localStorage.setItem("whatzup.picks", JSON.stringify({
-      grades: selected("gradeChips"), ages: selected("ageChips")
-    }));
-  } catch (e) { /* private browsing: not important enough to fuss about */ }
+    localStorage.setItem("whatzup.picks",
+      JSON.stringify({ grades: selected("gradeChips"), ages: selected("ageChips") }));
+  } catch (e) {}
 }
 function restorePicks() {
   let saved;
@@ -504,7 +502,7 @@ $("file").addEventListener("change", async e => {
   try {
     doc = await parsePdf(await file.arrayBuffer());
     const count = doc.days.reduce((n, d) => n + d.rows.length, 0);
-    if (!doc.days.length || !count) throw new Error("No day headings or activities found.");
+    if (!doc.days.length || !count) throw new Error("no day headings or activities found.");
     overrides = {};
     buildChips();
     $("filters").hidden = false;
@@ -514,13 +512,13 @@ $("file").addEventListener("change", async e => {
   } catch (err) {
     $("status").className = "status error";
     $("status").textContent = "Couldn't read that PDF — " + err.message +
-      " The school may have changed the layout of the schedule.";
+      " The school may have changed the schedule's layout.";
     console.error(err);
   }
 });
 
-$("showCancelled").addEventListener("change", render);
-$("reviewMode").addEventListener("change", render);
+["showCancelled", "reviewMode", "autoFit"].forEach(id =>
+  $(id).addEventListener("change", render));
 $("print").addEventListener("click", () => window.print());
 $("reset").addEventListener("click", () => location.reload());
 </script>
