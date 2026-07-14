@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root{
     --ink:#14213A;
@@ -129,7 +130,7 @@
     body{background:#fff}
     .wrap{max-width:none;padding:0}
     .noprint{display:none !important}
-    #stage{display:block !important;height:auto;overflow:visible}
+    #stage{display:block !important;height:auto !important;overflow:visible !important}
     #page{width:auto;min-height:0;transform:none;box-shadow:none}
     .off,.toggle{display:none !important}
     .review .row{grid-template-columns:calc(var(--fs) * 7.6pt) 1fr 31%}
@@ -167,7 +168,8 @@
   </section>
 
   <div class="actions noprint" id="actions" hidden>
-    <button id="print">Print / Save as PDF</button>
+    <button id="pdf">Download A4 PDF</button>
+    <button id="print" class="ghost">Print from browser</button>
     <button id="reset" class="ghost">Start over</button>
     <span class="fit" id="fit"></span>
   </div>
@@ -492,6 +494,161 @@ function restorePicks() {
 }
 
 /* ============================================================
+   THE PDF
+   Typeset the sheet ourselves rather than asking the browser to
+   print. Browsers disagree wildly about print layout — iOS Safari
+   in particular ignores @page — so this is the only way the same
+   single A4 page comes out on every device.
+   ============================================================ */
+const A4 = { w: 595.28, h: 841.89 };
+const M = 28;                                    /* 10mm margins */
+const CONTENT_W = A4.w - M * 2;
+const CONTENT_H = A4.h - M * 2 - 6;   /* 6pt of breathing room */
+const COL_TIME = 62, GAP = 8, COL_VENUE = 150;
+
+const INK = [20, 33, 58], SOFT = [90, 100, 120],
+      OX  = [142, 43, 51], BAND = [228, 231, 225],
+      RULE = [190, 195, 190], GREY = [150, 155, 165];
+
+/* One routine measures and draws, so what we measure is what we get.
+   Pass pdf = null to measure only. Returns the height used.        */
+function layout(pdf, fs, sheet) {
+  const lead = fs * 1.22;
+  let y = M;
+
+  const text = (s, x, yy, size, style, color) => {
+    if (!pdf) return;
+    pdf.setFont("helvetica", style);
+    pdf.setFontSize(size);
+    pdf.setTextColor(...color);
+    pdf.text(s, x, yy);
+  };
+
+  /* masthead */
+  const tSize = fs * 1.9;
+  text(sheet.title, M, y + tSize * 0.8, tSize, "bold", INK);
+  y += tSize * 1.05;
+  text(sheet.sub, M, y + fs * 0.75, fs * 0.85, "normal", OX);
+  y += fs * 1.1;
+  if (pdf) {
+    pdf.setDrawColor(...INK); pdf.setLineWidth(1.2); pdf.setLineDashPattern([], 0);
+    pdf.line(M, y, M + CONTENT_W, y);
+  }
+  y += fs * 0.7;
+
+  sheet.days.forEach(day => {
+    /* day band */
+    const bandH = fs * 1.5;
+    if (pdf) {
+      pdf.setFillColor(...BAND);
+      pdf.rect(M, y, CONTENT_W, bandH, "F");
+      pdf.setDrawColor(...INK); pdf.setLineWidth(1); pdf.setLineDashPattern([], 0);
+      pdf.line(M, y, M + CONTENT_W, y);
+      pdf.line(M, y + bandH, M + CONTENT_W, y + bandH);
+    }
+    text(day.name, M + 4, y + bandH * 0.72, fs * 0.95, "bold", INK);
+    y += bandH;
+
+    day.notes.forEach(n => {
+      const h = fs * 1.25;
+      text(n.toUpperCase(), M + 4, y + h * 0.75, fs * 0.82, "bold", OX);
+      y += h;
+      if (pdf) {
+        pdf.setDrawColor(...RULE); pdf.setLineWidth(0.4); pdf.setLineDashPattern([0.6, 1.4], 0);
+        pdf.line(M, y, M + CONTENT_W, y);
+      }
+    });
+
+    const wWidth = CONTENT_W - COL_TIME - COL_VENUE - GAP * 2;
+    day.rows.forEach(r => {
+      const cancelled = isCancelled(r.what);
+      let whatLines = [r.what], whereLines = r.where ? [r.where] : [""];
+      if (pdf) {
+        pdf.setFont("helvetica", "normal"); pdf.setFontSize(fs);
+        whatLines = pdf.splitTextToSize(r.what, wWidth);
+        pdf.setFont("helvetica", "italic"); pdf.setFontSize(fs * 0.88);
+        whereLines = r.where ? pdf.splitTextToSize(r.where, COL_VENUE) : [""];
+      } else {
+        /* measuring pass: approximate wrapping from character width */
+        whatLines = new Array(Math.max(1, Math.ceil(r.what.length * fs * 0.48 / wWidth)));
+        whereLines = new Array(Math.max(1, Math.ceil((r.where || "").length * fs * 0.42 / COL_VENUE)));
+      }
+      const rows = Math.max(whatLines.length, whereLines.length);
+      const h = rows * lead + fs * 0.35;
+
+      if (pdf) {
+        const base = y + lead * 0.78;
+        pdf.setFont("helvetica", "normal"); pdf.setFontSize(fs * 0.86);
+        pdf.setTextColor(...SOFT);
+        pdf.text(r.time, M + 4, base);
+
+        pdf.setFontSize(fs);
+        pdf.setTextColor(...(cancelled ? GREY : INK));
+        pdf.text(whatLines, M + COL_TIME + GAP, base);
+
+        pdf.setFont("helvetica", "italic"); pdf.setFontSize(fs * 0.88);
+        pdf.setTextColor(...SOFT);
+        pdf.text(whereLines, M + COL_TIME + GAP + wWidth + GAP, base);
+      }
+      y += h;
+      if (pdf) {
+        pdf.setDrawColor(...RULE); pdf.setLineWidth(0.4); pdf.setLineDashPattern([0.6, 1.4], 0);
+        pdf.line(M, y, M + CONTENT_W, y);
+      }
+    });
+
+    y += fs * 0.55;                                /* gap between days */
+  });
+
+  return y - M;
+}
+
+/* what's actually going on the sheet, after filtering and overrides */
+function keptSheet() {
+  const grades = selected("gradeChips"), ages = selected("ageChips");
+  const keepCancelled = $("showCancelled").checked;
+  const title = doc.header.find(h => /whatzup/i.test(h)) || "Weekly schedule";
+  const range = doc.header.find(h => /\d/.test(h) && h !== title) || "";
+  const who = [...grades, ...ages].join(" · ");
+
+  const days = doc.days.map(d => ({
+    name: d.name,
+    notes: d.notes.filter(n => verdict(n.id, n.text, grades, ages, keepCancelled).keep).map(n => n.text),
+    rows: d.rows.filter(r => verdict(r.id, r.what + " " + r.where, grades, ages, keepCancelled).keep),
+  })).filter(d => d.notes.length || d.rows.length);
+
+  return { title, sub: [range, who].filter(Boolean).join("  —  "), days };
+}
+
+function buildPdf() {
+  const { jsPDF } = window.jspdf;
+  const sheet = keptSheet();
+
+  /* largest type size that still fits one page */
+  let lo = 5, hi = 11, best = 5;
+  for (let i = 0; i < 16; i++) {
+    const mid = (lo + hi) / 2;
+    if (layout(null, mid, sheet) <= CONTENT_H) { best = mid; lo = mid; } else { hi = mid; }
+  }
+
+  /* the real wrap can differ from the estimate: step down until it fits */
+  let pdf, fs = best;
+  for (let i = 0; i < 12; i++) {
+    pdf = new jsPDF({ unit: "pt", format: "a4" });
+    if (layout(pdf, fs, sheet) <= CONTENT_H) break;
+    fs -= 0.25;
+    if (fs < 5) break;
+  }
+  pdf = new jsPDF({ unit: "pt", format: "a4" });
+  layout(pdf, fs, sheet);
+
+  const name = (sheet.sub.split("—")[0] || "schedule").trim()
+    .replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").toLowerCase();
+  pdf.save(`whatzup-${name || "week"}.pdf`);
+  return fs;
+}
+
+/* ============================================================
    WIRING
    ============================================================ */
 $("file").addEventListener("change", async e => {
@@ -519,7 +676,23 @@ $("file").addEventListener("change", async e => {
 
 ["showCancelled", "reviewMode", "autoFit"].forEach(id =>
   $(id).addEventListener("change", render));
+$("pdf").addEventListener("click", () => {
+  try {
+    const fs = buildPdf();
+    $("status").className = "status";
+    $("status").textContent = `Saved a one-page A4 PDF, set at ${fs.toFixed(1)}pt.`;
+  } catch (err) {
+    $("status").className = "status error";
+    $("status").textContent = "Couldn't build the PDF — " + err.message;
+    console.error(err);
+  }
+});
 $("print").addEventListener("click", () => window.print());
+
+/* the preview is measured in real type, so wait for the fonts */
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => { if (doc) render(); });
+}
 $("reset").addEventListener("click", () => location.reload());
 </script>
 </body>
