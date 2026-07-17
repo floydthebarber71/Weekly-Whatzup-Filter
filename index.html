@@ -212,14 +212,20 @@ const SHORT_RE = /\b(UIII|UII|UI|LIII|LII)\b/g;
 const LONG_RE  = /\b(UPPER III|UPPER II|UPPER I|LOWER III|LOWER II)\b/g;
 const AGE_RE   = /\bu(\d{1,2})\b/gi;
 const DAY_RE   = /^(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)\b\s*(\d{1,2}\s+[A-Z]+)?\s*(.*)$/i;
-const TIME_RE  = /^\d{1,2}:\d{2}/;
 
-/* Column boundaries in PDF points, measured off the real schedule:
-   times start at x=59, descriptions at x=157, venues at x=547. */
-const X_DESC  = 145;
-const X_VENUE = 530;
-const X_DAY   = 45;
+/* Column positions in the PDF are NOT reliable from week to week —
+   the school's template shifts slightly. So we don't hardcode x
+   thresholds for the description/venue split. Instead: pdf.js hands
+   us each printed run as its own text item, with a blank spacer item
+   between columns. Filtering out the blanks and looking at the GAP
+   between what's left is what actually separates "description" from
+   "venue" — a big gap is a column break, a small one is just a space
+   between words in the same cell. That adapts automatically no
+   matter where the school puts the columns.                       */
+const X_DAY   = 45;    /* day headings still reliably hug the left margin */
 const Y_TOL   = 4;
+const TIME_WHOLE = /^\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}$/;
+const GAP_MIN = 25;     /* pt — bigger than any normal word gap, smaller than a column gap */
 
 const FS_MIN = 5.2, FS_MAX = 11, FS_DEFAULT = 9;
 
@@ -237,8 +243,8 @@ async function parsePdf(arrayBuffer) {
     const page = await pdf.getPage(p);
     const content = await page.getTextContent();
     const items = content.items
-      .filter(i => i.str.trim() !== "")
-      .map(i => ({ text: i.str, x: i.transform[4], y: i.transform[5] }));
+      .map(i => ({ text: i.str, x: i.transform[4], y: i.transform[5], w: i.width || 0 }))
+      .filter(i => i.text.trim() !== "");   /* blank spacer runs did their job (the gap); drop them */
 
     const buckets = [];
     items.forEach(it => {
@@ -258,9 +264,22 @@ async function parsePdf(arrayBuffer) {
   const days = [];
   let current = null, id = 0;
 
+  /* does the start of this line's items read as a time range?
+     tries the first item alone, then the first two, then three —
+     covers PDFs that emit the time as one run or several.        */
+  function leadingTime(items) {
+    for (let n = 1; n <= Math.min(3, items.length); n++) {
+      const text = items.slice(0, n).map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
+      if (TIME_WHOLE.test(text)) return { time: text, rest: items.slice(n) };
+    }
+    return null;
+  }
+
   lines.forEach(line => {
-    const minX = Math.min(...line.items.map(i => i.x));
-    const joined = line.items.map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
+    const its = line.items;
+    if (!its.length) return;
+    const minX = its[0].x;
+    const joined = its.map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
     const dayMatch = minX < X_DAY ? joined.match(DAY_RE) : null;
 
     if (dayMatch) {
@@ -274,15 +293,19 @@ async function parsePdf(arrayBuffer) {
       return;
     }
 
-    const time = line.items.filter(i => i.x < X_DESC)
-      .map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
-
-    if (current && TIME_RE.test(time)) {
-      const what = line.items.filter(i => i.x >= X_DESC && i.x < X_VENUE)
-        .map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
-      const where = line.items.filter(i => i.x >= X_VENUE)
-        .map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
-      current.rows.push({ id: "r" + id++, time, what, where });
+    const t = current && leadingTime(its);
+    if (t) {
+      /* split the remainder into description / venue at its widest gap —
+         that's the column break, wherever it happens to sit this week */
+      let splitAt = t.rest.length, maxGap = -1;
+      for (let k = 0; k < t.rest.length - 1; k++) {
+        const gap = t.rest[k + 1].x - (t.rest[k].x + t.rest[k].w);
+        if (gap > maxGap) { maxGap = gap; splitAt = k + 1; }
+      }
+      const join = arr => arr.map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
+      const what  = maxGap > GAP_MIN ? join(t.rest.slice(0, splitAt)) : join(t.rest);
+      const where = maxGap > GAP_MIN ? join(t.rest.slice(splitAt)) : "";
+      current.rows.push({ id: "r" + id++, time: t.time, what, where });
       return;
     }
 
