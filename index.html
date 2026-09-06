@@ -222,7 +222,6 @@ const DAY_RE   = /^(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)\b\
    "venue" — a big gap is a column break, a small one is just a space
    between words in the same cell. That adapts automatically no
    matter where the school puts the columns.                       */
-const X_DAY   = 45;    /* day headings still reliably hug the left margin */
 const Y_TOL   = 4;
 const TIME_WHOLE = /^\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}$/;
 const GAP_MIN = 25;     /* pt — bigger than any normal word gap, smaller than a column gap */
@@ -278,9 +277,11 @@ async function parsePdf(arrayBuffer) {
   lines.forEach(line => {
     const its = line.items;
     if (!its.length) return;
-    const minX = its[0].x;
     const joined = its.map(i => i.text).join(" ").replace(/\s+/g, " ").trim();
-    const dayMatch = minX < X_DAY ? joined.match(DAY_RE) : null;
+    /* a day heading is identified by starting with the day name itself
+       (the ^ anchor in DAY_RE) — not by where it sits on the page,
+       since that shifts between the school's PDF exports */
+    const dayMatch = joined.match(DAY_RE);
 
     if (dayMatch) {
       current = {
