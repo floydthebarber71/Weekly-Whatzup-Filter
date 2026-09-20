@@ -132,7 +132,11 @@
     .wrap{max-width:none;padding:0}
     .noprint{display:none !important}
     #stage{display:block !important;height:auto !important;overflow:visible !important}
-    #page{width:auto;min-height:0;transform:none;box-shadow:none}
+    /* Only cancel the screen-fit zoom here — keep the same 190mm width the
+       auto-fit measured against. Letting width go "auto" for print made the
+       browser rewrap text at its own guessed width, which silently changed
+       how many lines each row took and broke the one-page fit. */
+    #page{width:var(--page-w);min-height:0;transform:none;box-shadow:none}
     .off,.toggle{display:none !important}
     .review .row{grid-template-columns:calc(var(--fs) * 7.8pt) 1fr 31%}
   }
