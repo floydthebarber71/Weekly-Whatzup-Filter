@@ -123,6 +123,9 @@
 
   /* while measuring — and when printing — dropped lines are simply gone */
   .measuring .off,.measuring .toggle{display:none !important}
+  /* print always collapses to 3 columns (no toggle buttons on paper) —
+     measure against that same width, not review mode's narrower one */
+  .measuring .row{grid-template-columns:calc(var(--fs) * 7.8pt) 1fr 31% !important}
 
   @media (max-width:520px){ h1{font-size:27px} }
 
@@ -450,8 +453,15 @@ function render() {
    truth. Shrink the base type until the content clears one page.
    Dropped lines are hidden while measuring — they don't print. */
 function pageLimitPx() {
+  /* Real headroom, not the exact page height. Searching for the largest
+     font that fits with zero slack means the tiniest difference between
+     how the browser composites text on screen and how its print engine
+     rasterizes it is enough to tip a borderline line onto a second,
+     near-empty page. The jsPDF download already carries this same
+     safety margin (see CONTENT_H) — this brings the browser-print path
+     up to the same standard. */
   const probe = document.createElement("div");
-  probe.style.cssText = "height:277mm;position:absolute;visibility:hidden;top:0;left:0";
+  probe.style.cssText = "height:calc(277mm - 8mm);position:absolute;visibility:hidden;top:0;left:0";
   document.body.appendChild(probe);
   const h = probe.getBoundingClientRect().height;
   probe.remove();
