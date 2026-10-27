@@ -684,22 +684,19 @@ function buildPdf() {
   const { jsPDF } = window.jspdf;
   const sheet = keptSheet();
 
-  /* largest type size that still fits one page */
-  let lo = 5, hi = 11, best = 5;
-  for (let i = 0; i < 16; i++) {
+  /* Largest type size that fits one page — measured with jsPDF's own
+     renderer at every step, not a character-count guess. A guess-then-
+     nudge approach (estimate the wrap, then correct in small steps)
+     can run out of steps on an unusually dense week and leave content
+     overflowing by a line; measuring for real from the start can't. */
+  let lo = 4, hi = 11, best = 4;
+  for (let i = 0; i < 18; i++) {
     const mid = (lo + hi) / 2;
-    if (layout(null, mid, sheet) <= CONTENT_H) { best = mid; lo = mid; } else { hi = mid; }
+    const probe = new jsPDF({ unit: "pt", format: "a4" });
+    if (layout(probe, mid, sheet) <= CONTENT_H) { best = mid; lo = mid; } else { hi = mid; }
   }
-
-  /* the real wrap can differ from the estimate: step down until it fits */
-  let pdf, fs = best;
-  for (let i = 0; i < 12; i++) {
-    pdf = new jsPDF({ unit: "pt", format: "a4" });
-    if (layout(pdf, fs, sheet) <= CONTENT_H) break;
-    fs -= 0.25;
-    if (fs < 5) break;
-  }
-  pdf = new jsPDF({ unit: "pt", format: "a4" });
+  const fs = best;
+  const pdf = new jsPDF({ unit: "pt", format: "a4" });
   layout(pdf, fs, sheet);
 
   const name = (sheet.sub.split("—")[0] || "schedule").trim()
