@@ -209,6 +209,9 @@ const GRADES = [
 ];
 const DEFAULT_GRADES = ["LIII"];
 const DEFAULT_AGES   = ["u12"];
+/* always offered, regardless of what any single week's PDF happens to
+   mention — a week with only u12 fixtures shouldn't hide u9/u10/u11/u13 */
+const STANDARD_AGES  = ["u9", "u10", "u11", "u12", "u13"];
 
 /* Longest alternatives first, \b at both ends, so UI never matches
    inside UII or UIII (nor LII inside LIII). */
@@ -364,7 +367,7 @@ function buildChips() {
     <label class="chip"><input type="checkbox" value="${g.code}"
       ${DEFAULT_GRADES.includes(g.code) ? "checked" : ""}><span>${g.label}</span></label>`).join("");
 
-  const found = new Set(DEFAULT_AGES);
+  const found = new Set(STANDARD_AGES);
   doc.days.forEach(d => {
     d.rows.forEach(r => agesIn(r.what).forEach(a => found.add(a)));
     d.notes.forEach(n => agesIn(n.text).forEach(a => found.add(a)));
@@ -534,7 +537,10 @@ function restorePicks() {
 const A4 = { w: 595.28, h: 841.89 };
 const M = 28;                                    /* 10mm margins */
 const CONTENT_W = A4.w - M * 2;
-const CONTENT_H = A4.h - M * 2 - 6;   /* 6pt of breathing room */
+const CONTENT_H = A4.h - M * 2 - 22;  /* real headroom, not just rounding slack —
+   printers routinely clip a few mm inside what they call "A4", and content
+   sitting flush against the calculated edge was spilling a sliver onto a
+   second, visually-blank sheet. */
 const GAP = 8, COL_VENUE = 150;
 
 const INK = [20, 33, 58], SOFT = [90, 100, 120],
