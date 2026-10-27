@@ -177,7 +177,7 @@
 
   <div class="actions noprint" id="actions" hidden>
     <button id="pdf">Download A4 PDF</button>
-    <button id="print" class="ghost">Print from browser</button>
+    <button id="print" class="ghost">Print</button>
     <button id="reset" class="ghost">Start over</button>
     <span class="fit" id="fit"></span>
   </div>
@@ -711,7 +711,19 @@ function buildPdf() {
 
   const name = (sheet.sub.split("—")[0] || "schedule").trim()
     .replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").toLowerCase();
-  pdf.save(`whatzup-${name || "week"}.pdf`);
+  return { pdf, fs, file: `whatzup-${name || "week"}.pdf` };
+}
+
+/* Printing goes through the same generated PDF as the download.
+   Printing the web page itself left the layout to the browser's print
+   engine, and iOS Safari ignores the page's own size and margins, so
+   the one-page fit could never be guaranteed that way. */
+function printPdf() {
+  const { pdf, fs } = buildPdf();
+  pdf.autoPrint();                       /* opens the print dialog where the viewer supports it */
+  const url = pdf.output("bloburl");
+  const w = window.open(url, "_blank");
+  if (!w) location.href = url;           /* pop-up blocked: open it in this tab instead */
   return fs;
 }
 
@@ -745,7 +757,8 @@ $("file").addEventListener("change", async e => {
   $(id).addEventListener("change", render));
 $("pdf").addEventListener("click", () => {
   try {
-    const fs = buildPdf();
+    const { pdf, fs, file } = buildPdf();
+    pdf.save(file);
     $("status").className = "status";
     $("status").textContent = `Saved a one-page A4 PDF, set at ${fs.toFixed(1)}pt.`;
   } catch (err) {
@@ -754,7 +767,17 @@ $("pdf").addEventListener("click", () => {
     console.error(err);
   }
 });
-$("print").addEventListener("click", () => window.print());
+$("print").addEventListener("click", () => {
+  try {
+    const fs = printPdf();
+    $("status").className = "status";
+    $("status").textContent = `Opened the one-page PDF (${fs.toFixed(1)}pt) to print.`;
+  } catch (err) {
+    $("status").className = "status error";
+    $("status").textContent = "Couldn't build the PDF — " + err.message;
+    console.error(err);
+  }
+});
 
 /* the preview is measured in real type, so wait for the fonts */
 if (document.fonts && document.fonts.ready) {
