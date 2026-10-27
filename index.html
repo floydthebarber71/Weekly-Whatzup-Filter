@@ -43,6 +43,7 @@
   h1{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:34px;line-height:1.05;
     margin:0 0 6px;letter-spacing:-.01em}
   .lede{margin:0;color:var(--ink-soft);font-size:15px;max-width:56ch}
+  .byline{margin-top:6px;font-style:italic}
 
   .panel{background:var(--card);border:1px solid var(--rule);border-radius:2px;
     padding:16px;margin-bottom:16px}
@@ -152,6 +153,7 @@
     <p class="eyebrow">Prep school weekly schedule</p>
     <h1>Filter the WhatzUp</h1>
     <p class="lede">Load the weekly PDF, tick the grades and age groups you care about, and print one A4 page for the fridge. The file never leaves your phone — everything runs in this page.</p>
+    <p class="lede byline">- Z. Essa</p>
   </header>
 
   <section class="panel noprint">
@@ -561,10 +563,14 @@ const CANC_RE = /\((?:cancelled|canceled)\)/i;
 
 /* One routine measures and draws, so what we measure is what we get.
    Pass pdf = null to measure only. Returns the height used.        */
-function layout(pdf, fs, sheet) {
+function layout(pdf, fs, sheet, paginate = false) {
   const lead = fs * 1.22;
   const COL_TIME = fs * 7.4;          /* wide enough for "07:00 - 07:35" at any size */
   let y = M;
+  /* with shrink-to-fit off, start a new page when the next item won't fit */
+  const room = h => {
+    if (paginate && pdf && y + h > M + CONTENT_H) { pdf.addPage(); y = M; }
+  };
 
   /* draw a line of description, tinting "(Cancelled)" red like the school does */
   const drawWhat = (line, x, yy) => {
@@ -611,6 +617,7 @@ function layout(pdf, fs, sheet) {
   sheet.days.forEach(day => {
     /* day band */
     const bandH = fs * 1.5;
+    room(bandH + fs * 2.6);              /* don't strand a day heading at the foot of a page */
     if (pdf) {
       pdf.setFillColor(...BAND);
       pdf.rect(M, y, CONTENT_W, bandH, "F");
@@ -623,6 +630,7 @@ function layout(pdf, fs, sheet) {
 
     day.notes.forEach(n => {
       const h = fs * 1.25;
+      room(h);
       text(n.toUpperCase(), M + 4, y + h * 0.75, fs * 0.82, "bold", OX);
       y += h;
       if (pdf) {
@@ -646,6 +654,7 @@ function layout(pdf, fs, sheet) {
       }
       const rows = Math.max(whatLines.length, whereLines.length);
       const h = rows * lead + fs * 0.35;
+      room(h);
 
       if (pdf) {
         const base = y + lead * 0.78;
@@ -699,15 +708,20 @@ function buildPdf() {
      nudge approach (estimate the wrap, then correct in small steps)
      can run out of steps on an unusually dense week and leave content
      overflowing by a line; measuring for real from the start can't. */
-  let lo = 4, hi = 11, best = 4;
-  for (let i = 0; i < 18; i++) {
-    const mid = (lo + hi) / 2;
-    const probe = new jsPDF({ unit: "pt", format: "a4" });
-    if (layout(probe, mid, sheet) <= CONTENT_H) { best = mid; lo = mid; } else { hi = mid; }
+  const fit = $("autoFit").checked;
+  let fs = FS_DEFAULT;
+  if (fit) {
+    let lo = 4, hi = 11, best = 4;
+    for (let i = 0; i < 18; i++) {
+      const mid = (lo + hi) / 2;
+      const probe = new jsPDF({ unit: "pt", format: "a4" });
+      if (layout(probe, mid, sheet) <= CONTENT_H) { best = mid; lo = mid; } else { hi = mid; }
+    }
+    fs = best;
   }
-  const fs = best;
+  /* shrink-to-fit off: standard type size, running onto extra pages as needed */
   const pdf = new jsPDF({ unit: "pt", format: "a4" });
-  layout(pdf, fs, sheet);
+  layout(pdf, fs, sheet, !fit);
 
   const name = (sheet.sub.split("—")[0] || "schedule").trim()
     .replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").toLowerCase();
